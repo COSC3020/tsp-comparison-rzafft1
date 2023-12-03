@@ -27,12 +27,15 @@ to this markdown file.
 # Time Complexity
 * The max input size for my implementation for a execution time under an hour is an 18 x 18 matrix. I tried a 19 x 19 matrix, and let it run for 24 hours, and it did not execute, so for the sake of my processer, I left it at that. I was pretty dissapointed with this so I made a few changes that cut my execution times in half, and allowed a 19 x 19 matrix to run in 25 seconds and reduced the execution time of a 18 x 18 matrix input from 20 seconds to 10 seconds. However similar to the first implementation, my second implementation did not execute after running it for a full day with a 20x20 matrix, so my max input size ended up being a 19x19 matrix. 
 
-![Time Complexity Graph](timecomplexity.png)
+![Time Complexity Graph](timecomplexity2a.png)
+
+![Time Complexity Graph](tourlengthzoom.png)
 
 # Tour Length
-* Local search will ALWAYS have a tour length equal to or greater than the held karp implementation. Held Karp finds the exact answer, while local search has a small chance of finding the exact answer even though it is still possible. Local search picks the minimum tour length of $2^n$ tour distance calculations that each use a random cities array as input. As long as our local search uses a cities array that contains every node in the graph ONCE, it is impossible for any random ordering of the cities array to have a tour length LESS than the held karp algorithm. As you can see in the graph below, with small inputs, the local search will often find the same answer as the held karp algorithm, soley because there is a much higher probability that we will come across one of the permutations that gives the shortest tour distance visiting all nodes once. As inputs get larger, the local search becomes less and less accurate, as there is a smaller probability that it can generate a random permutaton even out of 2^n tries, that finds the same tour length as the held karp algorithm. There are many ways we could improve local search, and I have tried several of them that consistently gave me smaller, but not exact answers. The reason I stuck with the implementation below, is because there is a big trade off between runtime and memory capacity. For example you could store random generations in a cache and make sure they are not used again (which would come at a cost of lots of memory usage and runtime when searching for permutataions), or when using our counter to 2^n in the while loop, we could reset the counter to zero every time we find a path that is smaller than the current so that the local search is required to find 2^n tours that are not smaller than the current tour in order to complete (this would be very costly in terms of time execution, but would surley find smaller tour lengths than my current implementation). Just for fun, I added the second implementation I just mentioned to my graphs below, so we can see how much better / worse a counter reset method could really be.  
+* Local search will ALWAYS have a tour length equal to or greater than the held karp implementation. Held Karp finds the exact answer, while local search has a small chance of finding the exact answer even though it is still possible. Local search picks the minimum tour length of $2^n$ tour distance calculations that each use a random cities array as input. As long as our local search uses a cities array that contains every node in the graph ONCE, it is impossible for any random ordering of the cities array to have a tour length LESS than the held karp algorithm. As you can see in the graph below, with small inputs, the local search will often find the same answer as the held karp algorithm, soley because there is a much higher probability that we will come across one of the permutations that gives the shortest tour distance visiting all nodes once. As inputs get larger, the local search becomes less and less accurate, as there is a smaller probability that it can generate a random permutaton even out of 2^n tries, that finds the same tour length as the held karp algorithm. There are many ways we could improve local search, and I have tried several of them that consistently gave me smaller, but not exact answers. The reason I stuck with the implementation below, is because there is a big trade off between runtime and memory capacity. For example you could store random generations in a cache and make sure they are not used again (which would come at a cost of lots of memory usage and runtime when searching for permutataions), or when using our counter to 2^n in the while loop, we could reset the counter to zero every time we find a path that is smaller than the current so that the local search is required to find 2^n tours that are not smaller than the current tour in order to complete (this would be very costly in terms of time execution, but would surley find smaller tour lengths than my current implementation). Just for fun, I added the second implementation I just mentioned to my graphs below, so we can see how much better / worse a counter reset method could really be.
+* I also added a third implementation of local search that is optimized for time complexity
 
-![Tour Length Graph](tourlength.png)
+![Tour Length Graph](tourlength2a.png)
 
 <u>TSP Local Search (without loop reset)</u>
 ```javascript
@@ -109,7 +112,7 @@ end = performance.now();
 console.log("Execution Time (seconds): " + ((end - start) / 1000).toFixed(5))
 ```
 
-<u>TSP Local Search (with loop reset)</u>
+<u>TSP Local Search (with tour length optimization)</u>
 
 The only difference in this implementation of local search is that we require the algorithm to find $2^n$ tour lengths worse than the current tour length in order to finish. The execution time for this implementation is much worse than the original, when we use larger inputs. 
 
@@ -132,6 +135,26 @@ function tsp_ls(dm)
     {
       runtimes++
     }
+  }
+  return minDist
+}
+```
+
+<u>TSP Local Search (with time complexity optimization)</u>
+
+The only difference in this implementation of local search is that we require the algorithm to find $n^2$ tour lengths instead of $2^n$. 
+
+```javascript
+function tsp_ls(dm)
+{
+  let minDist = Infinity
+  runtimes = 0
+
+  while (runtimes < (dm.length)*(dm.length))
+  {
+    let sumDist = _tsp_ls(dm)
+    minDist = Math.min(minDist, sumDist) 
+    runtimes++
   }
   return minDist
 }
